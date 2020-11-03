@@ -15,18 +15,9 @@ import java.util.List;
 public class SudokuSolver implements ISodukoSolver {
 
     private int[][] sudoku;
-    int[] numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    List<Integer> col = new ArrayList<>();
-    List<Integer> row = new ArrayList<>();
 
     public SudokuSolver() {
 
-    }
-
-    public static void main(String[] args) {
-        SudokuSolver ss = new SudokuSolver();
-        int[][] arr = ss.readSudoku(new File("1_sudoku_level1.csv"));
-        ss.checkSudoku(arr);
     }
 
     @Override
@@ -70,40 +61,11 @@ public class SudokuSolver implements ISodukoSolver {
 
     @Override
     public int[][] solveSudoku(int[][] rawSudoku) {
-        rawSudoku = solveRowsSudoku(rawSudoku);
-        List<Integer> list = new ArrayList<>();
-        List<Integer> doubleList = new ArrayList<>();
-        int counter = 0;
-        int maxCounter = 1;
-        while (maxCounter < 10) {
-            for (int i = 0; i < rawSudoku.length; i++) {
-                for (int j = counter; j < maxCounter; j++) {
-                    if (!list.isEmpty()) {
-                        if (list.contains(rawSudoku[i][j])) {
-                            doubleList.add(rawSudoku[i][j]);
-                        } else {
-                            list.add(rawSudoku[j][i]);
-                        }
-                    } else {
-                        list.add(rawSudoku[j][i]);
-                    }
-                }
-            }
-
-            for (int i = 0; i < rawSudoku.length; i++) {
-                for (int j = counter; j < maxCounter; j++) {
-                    if (doubleList.contains(rawSudoku[i][j])) {
-                        rawSudoku[i][j] = 0;
-                    }
-                }
-            }
-            maxCounter++;
-            counter++;
-            list.clear();
-            doubleList.clear();
+        boolean solved = solve(rawSudoku);
+        if (!solved) {
+            System.out.println("Sudoku couldn't be solved");
         }
-        //rawSudoku = solveColsSudoku(rawSudoku);
-        return rawSudoku; // delete this line!
+        return rawSudoku;
     }
 
     @Override
@@ -112,10 +74,10 @@ public class SudokuSolver implements ISodukoSolver {
         return new int[0][0]; // delete this line!
     }
 
-    public long benchmark(int[][] rawSudoku) {
+    public long benchmark(int[][] rawSudoku, File file) {
         long start = System.currentTimeMillis();
         for (int i = 0; i <= 10; i++) {
-            readSudoku(new File("1_sudoku_level1.csv"));
+            readSudoku(file);
             checkSudoku(rawSudoku);
             solveSudoku(rawSudoku);
         }
@@ -124,6 +86,8 @@ public class SudokuSolver implements ISodukoSolver {
     }
 
     // add helper methods here if necessary
+    
+    //befüllt Liste mit möglichen Werten (1-9) des Sudokus 
     public List<Integer> fillList() {
         List<Integer> list = new ArrayList<>();
         for (int i = 1; i < 10; i++) {
@@ -132,6 +96,7 @@ public class SudokuSolver implements ISodukoSolver {
         return list;
     }
 
+    //checkt alle Reihen des Sudokus
     public boolean checkRows(int[][] arr) {
         List<Integer> list = fillList();
         for (int i = 0; i < arr.length; i++) {
@@ -148,6 +113,7 @@ public class SudokuSolver implements ISodukoSolver {
         return true;
     }
 
+    //checkt alle Spalten des Sudokus
     public boolean checkCols(int[][] arr) {
         List<Integer> list = fillList();
         for (int i = 0; i < arr.length; i++) {
@@ -163,17 +129,19 @@ public class SudokuSolver implements ISodukoSolver {
         return true;
     }
 
+    //checkt alle 3x3 Quadrate des Sudokus
     public boolean checkQuad(int[][] arr) {
         for (int rows = 0; rows <= 6; rows += 3) {
             for (int col = 0; col <= 6; col += 3) {
-                if (subQuad(arr, rows, col) == false) {
-                    return false;
+                if (subQuad(arr, rows, col)) {
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
+    //checkt ein 3x3 Quadrat des Sudokus
     public boolean subQuad(int[][] arr, int row, int col) {
         List<Integer> list = fillList();
         for (int i = row; i < row + 3; i++) {
@@ -188,72 +156,63 @@ public class SudokuSolver implements ISodukoSolver {
         return true;
     }
 
-    public int[][] solveRowsSudoku(int[][] rawSudoku) {
-        List<Integer> list = fillList();
-        int counter = 0;
-        int maxCount = 1;
-
-        while (maxCount < 10) {
-            for (int i = counter; i < maxCount; i++) {
-                for (int j = 0; j < rawSudoku.length; j++) {
-                    if (list.contains(rawSudoku[i][j])) {
-                        list.remove((Integer) (rawSudoku[i][j]));
-                    }
-                }
+    //checkt ob eine Nummer in einer Reihe schon vorhanden ist
+    public boolean checkNumberAlreadyInRow(int[][] arr, int row, int number) {
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[row][i] == number) {
+                return true;
             }
-            maxCount++;
-            counter++;
-            for (int i = 0; i < rawSudoku.length; i++) {
-                for (int j = 0; j < rawSudoku.length; j++) {
-                    if (rawSudoku[i][j] == 0) {
-                        if (list.isEmpty()) {
-                            break;
-                        } else {
-                            rawSudoku[i][j] = list.get(list.size() - 1);
-                            list.remove(list.size() - 1);
-                        }
-                    }
-                }
-            }
-            list = fillList();
         }
-        return rawSudoku;
+        return false;
     }
 
-    public int[][] solveColsSudoku(int[][] rawSudoku) {
-        List<Integer> list = fillList();
-        int counter = 0;
-        int maxCount = 1;
-        while (maxCount < 10) {
-            for (int i = 0; i < rawSudoku.length; i++) {
-                for (int j = 0; j < rawSudoku.length; j++) {
-
-                }
-
+    //checkt ob eine Nummer in einer Spalte schon vorhanden ist
+    public boolean checkNumberAlreadyInCol(int[][] arr, int col, int number) {
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i][col] == number) {
+                return true;
             }
-            for (int i = counter; i < maxCount; i++) {
-                for (int j = 0; j < rawSudoku.length; j++) {
-                    if (list.contains(rawSudoku[j][i])) {
-                        list.remove((Integer) (rawSudoku[j][i]));
-                    }
+        }
+        return false;
+    }
+
+    //checkt ob eine Nummer in einem 3x3 Quadrat schon vorhanden ist
+    public boolean checkNumberAlreadyInQuad(int[][] arr, int row, int col, int number) {
+        row = row - row % 3;
+        col = col - col % 3;
+        for (int i = row; i < row + 3; i++) {
+            for (int j = col; j < col + 3; j++) {
+                if (arr[i][j] == number) {
+                    return true;
                 }
             }
-            maxCount++;
-            counter++;
-            for (int i = 0; i < rawSudoku.length; i++) {
-                for (int j = 0; j < rawSudoku.length; j++) {
-                    if (rawSudoku[j][i] == 0) {
-                        if (list.isEmpty()) {
-                            break;
-                        } else {
-                            rawSudoku[j][i] = list.get(list.size() - 1);
-                            list.remove(list.size() - 1);
+        }
+        return false;
+    }
+
+    //checkt ob eine Nummer in im Sudoku vorkommen kann
+    public boolean checkNumberInSudoku(int[][] arr, int row, int col, int number) {
+        return !checkNumberAlreadyInCol(arr, col, number) && !checkNumberAlreadyInRow(arr, row, number) && !checkNumberAlreadyInQuad(arr, row, col, number);
+    }
+
+    public boolean solve(int[][] rawSudoku) {
+        for (int i = 0; i < rawSudoku.length; i++) {
+            for (int j = 0; j < rawSudoku.length; j++) {
+                if (rawSudoku[i][j] == 0) {
+                    for (int number = 1; number <= rawSudoku.length; number++) {
+                        if (checkNumberInSudoku(rawSudoku, i, j, number)) {
+                            rawSudoku[i][j] = number;
+                            if (solve(rawSudoku)) {
+                                return true;
+                            } else {
+                                rawSudoku[i][j] = 0;
+                            }
                         }
                     }
+                    return false;
                 }
             }
-            list = fillList();
         }
-        return rawSudoku;
+        return true;
     }
 }

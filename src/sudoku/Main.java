@@ -14,7 +14,7 @@ public class Main {
                 System.out.print(input[i][j] + "|");
             }
             System.out.println("");
-        }
+        } 
         int[][] output = ss.solveSudoku(input);
         System.out.println(">--- SOLUTION ---");
         for (int i = 0; i < output.length; i++) {
@@ -26,5 +26,6 @@ public class Main {
         System.out.println(">----------------");
         System.out.println("SOLVED    = " + ss.checkSudoku(output));
         System.out.println(">----------------");
+        System.out.println(ss.benchmark(output, new File("1_sudoku_level1.csv")));
     }
 }
