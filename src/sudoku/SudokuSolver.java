@@ -53,7 +53,6 @@ public class SudokuSolver implements ISodukoSolver {
 
     @Override
     public boolean checkSudoku(int[][] rawSudoku) {
-
         boolean cols = checkCols(rawSudoku);
         if (cols == false) {
             return false;
@@ -71,13 +70,57 @@ public class SudokuSolver implements ISodukoSolver {
 
     @Override
     public int[][] solveSudoku(int[][] rawSudoku) {
-        return new int[0][0]; // delete this line!
+        rawSudoku = solveRowsSudoku(rawSudoku);
+        List<Integer> list = new ArrayList<>();
+        List<Integer> doubleList = new ArrayList<>();
+        int counter = 0;
+        int maxCounter = 1;
+        while (maxCounter < 10) {
+            for (int i = 0; i < rawSudoku.length; i++) {
+                for (int j = counter; j < maxCounter; j++) {
+                    if (!list.isEmpty()) {
+                        if (list.contains(rawSudoku[i][j])) {
+                            doubleList.add(rawSudoku[i][j]);
+                        } else {
+                            list.add(rawSudoku[j][i]);
+                        }
+                    } else {
+                        list.add(rawSudoku[j][i]);
+                    }
+                }
+            }
+
+            for (int i = 0; i < rawSudoku.length; i++) {
+                for (int j = counter; j < maxCounter; j++) {
+                    if (doubleList.contains(rawSudoku[i][j])) {
+                        rawSudoku[i][j] = 0;
+                    }
+                }
+            }
+            maxCounter++;
+            counter++;
+            list.clear();
+            doubleList.clear();
+        }
+        //rawSudoku = solveColsSudoku(rawSudoku);
+        return rawSudoku; // delete this line!
     }
 
     @Override
     public int[][] solveSudokuParallel(int[][] rawSudoku) {
         // implement this method
         return new int[0][0]; // delete this line!
+    }
+
+    public long benchmark(int[][] rawSudoku) {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i <= 10; i++) {
+            readSudoku(new File("1_sudoku_level1.csv"));
+            checkSudoku(rawSudoku);
+            solveSudoku(rawSudoku);
+        }
+        long end = System.currentTimeMillis();
+        return (end - start) / 10;
     }
 
     // add helper methods here if necessary
@@ -89,7 +132,7 @@ public class SudokuSolver implements ISodukoSolver {
         return list;
     }
 
-    public boolean checkCols(int[][] arr) {
+    public boolean checkRows(int[][] arr) {
         List<Integer> list = fillList();
         for (int i = 0; i < arr.length; i++) {
             for (int j = 0; j < arr.length; j++) {
@@ -105,7 +148,7 @@ public class SudokuSolver implements ISodukoSolver {
         return true;
     }
 
-    public boolean checkRows(int[][] arr) {
+    public boolean checkCols(int[][] arr) {
         List<Integer> list = fillList();
         for (int i = 0; i < arr.length; i++) {
             for (int j = 0; j < arr.length; j++) {
@@ -132,7 +175,6 @@ public class SudokuSolver implements ISodukoSolver {
     }
 
     public boolean subQuad(int[][] arr, int row, int col) {
-
         List<Integer> list = fillList();
         for (int i = row; i < row + 3; i++) {
             for (int j = col; j < col + 3; j++) {
@@ -144,5 +186,74 @@ public class SudokuSolver implements ISodukoSolver {
             }
         }
         return true;
+    }
+
+    public int[][] solveRowsSudoku(int[][] rawSudoku) {
+        List<Integer> list = fillList();
+        int counter = 0;
+        int maxCount = 1;
+
+        while (maxCount < 10) {
+            for (int i = counter; i < maxCount; i++) {
+                for (int j = 0; j < rawSudoku.length; j++) {
+                    if (list.contains(rawSudoku[i][j])) {
+                        list.remove((Integer) (rawSudoku[i][j]));
+                    }
+                }
+            }
+            maxCount++;
+            counter++;
+            for (int i = 0; i < rawSudoku.length; i++) {
+                for (int j = 0; j < rawSudoku.length; j++) {
+                    if (rawSudoku[i][j] == 0) {
+                        if (list.isEmpty()) {
+                            break;
+                        } else {
+                            rawSudoku[i][j] = list.get(list.size() - 1);
+                            list.remove(list.size() - 1);
+                        }
+                    }
+                }
+            }
+            list = fillList();
+        }
+        return rawSudoku;
+    }
+
+    public int[][] solveColsSudoku(int[][] rawSudoku) {
+        List<Integer> list = fillList();
+        int counter = 0;
+        int maxCount = 1;
+        while (maxCount < 10) {
+            for (int i = 0; i < rawSudoku.length; i++) {
+                for (int j = 0; j < rawSudoku.length; j++) {
+
+                }
+
+            }
+            for (int i = counter; i < maxCount; i++) {
+                for (int j = 0; j < rawSudoku.length; j++) {
+                    if (list.contains(rawSudoku[j][i])) {
+                        list.remove((Integer) (rawSudoku[j][i]));
+                    }
+                }
+            }
+            maxCount++;
+            counter++;
+            for (int i = 0; i < rawSudoku.length; i++) {
+                for (int j = 0; j < rawSudoku.length; j++) {
+                    if (rawSudoku[j][i] == 0) {
+                        if (list.isEmpty()) {
+                            break;
+                        } else {
+                            rawSudoku[j][i] = list.get(list.size() - 1);
+                            list.remove(list.size() - 1);
+                        }
+                    }
+                }
+            }
+            list = fillList();
+        }
+        return rawSudoku;
     }
 }
