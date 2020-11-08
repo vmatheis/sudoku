@@ -27,7 +27,7 @@ public class SudokuSolver implements ISodukoSolver {
 
     }
 
-    //Benchmark: ich hätte erwartet, dass die parallelisierte Version schneller ist, jedoch trifft dies nicht zu
+    //Benchmark: ich habe genau erwartet, dass die parallelisierte Methode schneller ist
     public static void main(String[] args) throws InterruptedException {
         SudokuSolver ss = new SudokuSolver();
         File file = new File("1_sudoku_level1.csv");

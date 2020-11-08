@@ -20,31 +20,32 @@ public class MyThreadSolve implements Callable<Boolean> {
     }
 
     public boolean checkNumberInSudoku(int[][] arr, int row, int col, int number) {
-        boolean result = false;
+        boolean result1 = false;
+        boolean result2 = false;
+        boolean result3 = false;
         for (int i = 0; i < arr.length; i++) {
             if (arr[row][i] == number) {
-                result = true;
+                result1 = true;
             }
         }
-        if (!result) {
-            return false;
-        }
+        
         for (int i = 0; i < arr.length; i++) {
             if (arr[i][col] == number) {
-                result = true;
+                result2 = true;
             }
         }
-        if (!result) {
-            return false;
-        }
+        
         row = row - row % 3;
         col = col - col % 3;
         for (int i = row; i < row + 3; i++) {
             for (int j = col; j < col + 3; j++) {
                 if (arr[i][j] == number) {
-                    return true;
+                    result3 = true;
                 }
             }
+        }
+        if(result1 && result2 && result3){
+            return true;
         }
         return false;
     }
